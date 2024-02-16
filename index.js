@@ -3,7 +3,7 @@ const app = express()
 
 app.use(express.json())
 
-const persons = [
+let persons = [
     { 
       "id": 1,
       "name": "Arto Hellas", 
@@ -42,7 +42,7 @@ app.get('/api/persons/', (request, response) => {
 app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)    
     const person = persons.find(person => {
-        console.log('person.id', typeof person.id, 'id', typeof id, person.id === id )
+        // console.log('person.id', typeof person.id, 'id', typeof id, person.id === id )
         return person.id === id
     } )
 
@@ -52,12 +52,39 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(404).end()
     }
 })
+
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)    
     const person = persons.filter(person => person.id !== id)
 
     console.log('delete..', person)
     response.status(204).end()
+})
+
+const generarId = (min, max) => {
+    
+    return  Math.floor((Math.random() * (max - min + 1)) + min)
+}
+
+app.post('/api/persons', (request, response) => {
+    const body = request.body
+
+    if (!body.name || !body.number) {
+        return response.status(400).json({
+            error: 'content missing'
+        })
+    }
+
+    const person = {
+        name: body.name,
+        number: body.number,
+        id: generarId(0, 1000)
+    }
+    console.log('newPerson..', person)
+
+    persons = persons.concat(person)
+    
+    response.json(person)
 })
 
 
