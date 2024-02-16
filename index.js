@@ -61,20 +61,29 @@ app.delete('/api/persons/:id', (request, response) => {
     response.status(204).end()
 })
 
-const generarId = (min, max) => {
-    
+const generarId = (min, max) => {    
     return  Math.floor((Math.random() * (max - min + 1)) + min)
 }
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
 
+    // Verificar si falta el nombre o el número
     if (!body.name || !body.number) {
         return response.status(400).json({
             error: 'content missing'
         })
     }
 
+    // Verificar si el nombre ya existe en la lista de personas
+    const nameExists = persons.some(person => person.name === body.name)
+    if (nameExists) {
+        return response.status(400).json({
+            error: 'name must be unique'
+        })
+    }
+
+    // Si todo está bien, crear la nueva persona
     const person = {
         name: body.name,
         number: body.number,
@@ -82,8 +91,10 @@ app.post('/api/persons', (request, response) => {
     }
     console.log('newPerson..', person)
 
+    // Agregar la nueva persona a la lista
     persons = persons.concat(person)
     
+    // Responder con la nueva persona
     response.json(person)
 })
 
