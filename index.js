@@ -1,7 +1,14 @@
 const express = require('express')
+const morgan = require('morgan')
+
 const app = express()
 
 app.use(express.json())
+app.use(morgan('tiny'))
+app.use(express.json())
+
+morgan.token('body', (request) => JSON.stringify(request.body))
+app.use(morgan(':method :url :status - :response-time ms :body'));
 
 let persons = [
     { 
@@ -66,7 +73,7 @@ const generarId = (min, max) => {
 }
 
 app.post('/api/persons', (request, response) => {
-    const body = request.body
+    const body = request.body    
 
     // Verificar si falta el nombre o el número
     if (!body.name || !body.number) {
