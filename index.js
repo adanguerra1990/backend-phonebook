@@ -7,6 +7,7 @@ const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.use(express.static('dist'))
 app.use(morgan('tiny'))
 app.use(express.json())
 
@@ -65,9 +66,9 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)    
-    const person = persons.filter(person => person.id !== id)
+    persons = persons.filter(person => person.id !== id)
 
-    console.log('delete..', person)
+    console.log('delete..', persons, id)
     response.status(204).end()
 })
 
