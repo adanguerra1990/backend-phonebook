@@ -2,6 +2,10 @@ const mongoose = require('mongoose')
 
 if (process.argv.length < 3) {
     console.log('Ingrese la contraseña')
+<<<<<<< HEAD
+=======
+    console.log('va..', process.argv.length < 3)
+>>>>>>> 9cd5a11e3e882121f9c10b0cd5a8d27518ede607
     process.exit(1)
 }
 
