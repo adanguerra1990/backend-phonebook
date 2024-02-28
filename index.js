@@ -19,7 +19,9 @@ const errorHandler = (error, request, response, next) => {
 
     if (error.name === 'CastError') {
         return response.status(400).send({ error: 'malformatted id' })
-    }
+    } else if (error.name === 'ValidationError'){
+        return response.status(400).json({ error: error.message })
+    } 
 
     next(error)
 }
@@ -62,12 +64,6 @@ app.get('/api/persons/', (request, response) => {
 app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
-    // Verificar si falta el nombre o el número
-    if (!body.name === undefined || !body.number === undefined) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    }
      // Buscar en la base de datos una persona con el mismo nombre
      Person.findOne({ name: body.name })
      .then(person => {
@@ -82,7 +78,6 @@ app.post('/api/persons', (request, response, next) => {
                  name: body.name,
                  number: body.number,
              });
-
              // Guardar la nueva persona en la base de datos
              return person.save();
          }
@@ -93,36 +88,12 @@ app.post('/api/persons', (request, response, next) => {
      .catch(error => next(error));
 })
 
-// app.get('/api/persons/:id', (request, response) => {
-//     const id = Number(request.params.id)    
-//     const person = persons.find(person => {
-//         // console.log('person.id', typeof person.id, 'id', typeof id, person.id === id )
-//         return person.id === id
-//     } )
-
-//     if (person) {
-//         response.json(person)
-//     } else {
-//         response.status(404).end()
-//     }
-// })
 app.get('/api/persons/:id', (request, response) => {
     Person.findById(request.params.id).then(person => {
         response.json(person)
     })
 })
 
-// app.delete('/api/persons/:id', (request, response) => {
-//     const id = Number(request.params.id)    
-//     persons = persons.filter(person => person.id !== id)
-
-//     console.log('delete..', persons, id)
-//     response.status(204).end()
-// })
-
-// const generarId = (min, max) => {    
-//     return  Math.floor((Math.random() * (max - min + 1)) + min)
-// }
 app.delete('/api/persons/:id', (request, response, next) => {
     Person.findByIdAndDelete(request.params.id).then(person => {
         response.status(204).end()
@@ -131,14 +102,13 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-    const body = request.body
+    const { name, number} = request.body    
 
-    const person = {
-        name: body.name,
-        number: body.number,
-    }
-
-    Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    Person.findByIdAndUpdate(
+        request.params.id, 
+        {name, number}, 
+        { new: true, runValidators: true, context: 'query'}
+    )
         .then(updatePerson => {
             response.json(updatePerson)
         })
